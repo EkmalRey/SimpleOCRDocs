@@ -124,7 +124,6 @@ Once running, visit:
 │   ├── receipt.jpg           # Sample receipt image
 │   └── KTP.jpeg             # Sample ID card image
 └── .github/
-    ├── copilot-instructions.md
     └── images/
         └── Demo.png          # Demo screenshot
 ```
