@@ -2,6 +2,8 @@
 
 A lightweight FastAPI-based service for processing document images using OCR and extracting structured information.
 
+![Demo Screenshot](.github/images/Demo.png)
+
 ## Features
 
 - **OCR Text Extraction**: Uses pytesseract to extract text from uploaded images
@@ -52,6 +54,10 @@ uvicorn main:app --reload
 
 The API will be available at `http://localhost:8000`
 
+### Web Interface
+
+Access the user-friendly web interface at `http://localhost:8000` to upload and analyze documents through your browser.
+
 ## API Usage
 
 ### POST /analyze
@@ -83,6 +89,20 @@ Upload an image file for document analysis.
 curl -X POST "http://localhost:8000/analyze" -F "file=@your_document.jpg"
 ```
 
+### Testing with the Test Script
+
+The project includes a comprehensive test script that creates sample documents and tests the API:
+
+```bash
+python test_api.py
+```
+
+This will:
+- Create sample invoice and receipt images
+- Save them to the `samples/` directory
+- Test the API endpoints automatically
+- Display the analysis results
+
 ## API Documentation
 
 Once running, visit:
@@ -92,11 +112,21 @@ Once running, visit:
 ## Project Structure
 
 ```
-├── main.py                 # Main FastAPI application
-├── requirements.txt        # Python dependencies
-├── README.md              # This file
+├── main.py                    # Main FastAPI application
+├── requirements.txt           # Python dependencies  
+├── test_api.py               # Test script with sample document generation
+├── TEST.ipynb                # Jupyter notebook for testing
+├── README.md                 # This file
+├── static/
+│   └── index.html            # Web interface for document upload
+├── samples/                  # Sample document images
+│   ├── invoice.png           # Sample invoice image
+│   ├── receipt.jpg           # Sample receipt image
+│   └── KTP.jpeg             # Sample ID card image
 └── .github/
-    └── copilot-instructions.md
+    ├── copilot-instructions.md
+    └── images/
+        └── Demo.png          # Demo screenshot
 ```
 
 ## Document Types Supported
@@ -105,13 +135,38 @@ Once running, visit:
 2. **Receipts**: Identifies purchase receipts and extracts vendor, total, date  
 3. **ID Cards**: Recognizes identity documents and extracts name, ID number, birth date
 
+### Sample Images
+
+The project includes sample images in the `samples/` directory:
+- `invoice.png` - Sample invoice document
+- `receipt.jpg` - Sample receipt document  
+- `KTP.jpeg` - Sample Indonesian ID card
+
+You can test the API with these samples or use the test script to generate new ones.
+
 ## How It Works
 
-1. **Image Upload**: Accepts image files via HTTP POST
+1. **Image Upload**: Accepts image files via HTTP POST or web interface
 2. **OCR Processing**: Extracts raw text using pytesseract
 3. **Classification**: Uses keyword matching to determine document type
 4. **Field Extraction**: Applies regex patterns based on document type
 5. **JSON Response**: Returns structured data with extracted information
+
+## Testing & Development
+
+### Automated Testing
+```bash
+# Run the test script to generate samples and test API
+python test_api.py
+```
+
+### Interactive Testing
+- Use the web interface at `http://localhost:8000`
+- Upload your own document images
+- View real-time analysis results
+
+### Jupyter Notebook
+Open `TEST.ipynb` for interactive development and testing of the OCR and classification logic.
 
 ## Limitations
 
@@ -123,7 +178,21 @@ Once running, visit:
 ## Future Enhancements
 
 - Add support for more document types
-- Implement ML-based classification
+- Implement ML-based classification  
 - Add confidence scores
 - Support for multiple languages
 - Database logging of results
+- Batch processing capabilities
+- Enhanced web interface with preview
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test with `python test_api.py`
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
