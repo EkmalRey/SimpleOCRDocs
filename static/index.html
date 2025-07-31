@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Intelligence System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #4facfe;
+            background: #e3f2fd;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-section {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .result-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .result-content {
+            padding: 20px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .field-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+        }
+
+        .field-value {
+            color: #6c757d;
+            word-break: break-word;
+        }
+
+        .document-type {
+            display: inline-block;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .json-content {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .copy-btn[style*="background: #17a2b8"]:hover {
+            background: #138496 !important;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .field-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Document Intelligence System</h1>
+            <p>Upload an image to analyze invoices, receipts, and ID cards</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section" id="uploadSection">
+                <div>
+                    <h3>📁 Select or Drop an Image</h3>
+                    <p style="margin: 15px 0; color: #6c757d;">
+                        Supported formats: JPEG, PNG, GIF, BMP
+                    </p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*">
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        Choose File
+                    </button>
+                    <div id="fileName" style="margin-top: 15px; font-weight: bold; color: #495057;"></div>
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                    <button id="analyzeBtn" class="analyze-btn" style="display: none;" onclick="analyzeDocument()">
+                        🔍 Analyze Document
+                    </button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing document...</p>
+            </div>
+
+            <div class="results" id="results">
+                <div class="result-section">
+                    <div class="result-header">
+                        📋 Analysis Results
+                    </div>
+                    <div class="result-content">
+                        <div style="margin-bottom: 20px;">
+                            <strong>Document Type:</strong> 
+                            <span id="documentType" class="document-type"></span>
+                        </div>
+                        <div id="extractedFields" class="field-grid"></div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-header">
+                        🔧 Raw JSON Response
+                    </div>
+                    <div class="result-content">
+                        <button class="copy-btn" onclick="copyToClipboard()">📋 Copy JSON</button>
+                        <button class="copy-btn" onclick="exportToCSV()" style="background: #17a2b8; margin-left: 10px;">📊 Export CSV</button>
+                        <div id="rawJson" class="json-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let currentResponse = null;
+
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Drag and drop handling
+        const uploadSection = document.getElementById('uploadSection');
+        
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file (JPEG, PNG, GIF, BMP)');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+            
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            document.getElementById('analyzeBtn').style.display = 'inline-block';
+            hideError();
+        }
+
+        async function analyzeDocument() {
+            if (!selectedFile) {
+                showError('Please select a file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            hideError();
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentResponse = data;
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Analysis failed: ${error.message}`);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            // Display document type
+            document.getElementById('documentType').textContent = data.document_type;
+
+            // Display extracted fields
+            const fieldsContainer = document.getElementById('extractedFields');
+            fieldsContainer.innerHTML = '';
+
+            if (Object.keys(data.fields).length === 0) {
+                fieldsContainer.innerHTML = '<p style="color: #6c757d; font-style: italic;">No specific fields extracted for this document type.</p>';
+            } else {
+                for (const [key, value] of Object.entries(data.fields)) {
+                    if (value) {
+                        const fieldDiv = document.createElement('div');
+                        fieldDiv.className = 'field-item';
+                        fieldDiv.innerHTML = `
+                            <div class="field-label">${key.replace('_', ' ')}</div>
+                            <div class="field-value">${value}</div>
+                        `;
+                        fieldsContainer.appendChild(fieldDiv);
+                    }
+                }
+            }
+
+            // Display raw JSON
+            document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            if (currentResponse) {
+                navigator.clipboard.writeText(JSON.stringify(currentResponse, null, 2))
+                    .then(() => {
+                        const btn = document.querySelector('.copy-btn');
+                        const originalText = btn.textContent;
+                        btn.textContent = '✅ Copied!';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        showError('Failed to copy to clipboard');
+                    });
+            }
+        }
+
+        function exportToCSV() {
+            if (!currentResponse) {
+                showError('No data to export');
+                return;
+            }
+
+            try {
+                // Prepare CSV data
+                const csvData = [];
+                const headers = ['Field', 'Value'];
+                csvData.push(headers);
+
+                // Add document type
+                csvData.push(['Document Type', currentResponse.document_type]);
+
+                // Add extracted fields
+                if (currentResponse.fields && Object.keys(currentResponse.fields).length > 0) {
+                    for (const [key, value] of Object.entries(currentResponse.fields)) {
+                        if (value) {
+                            // Clean the value by removing commas and extra whitespace
+                            const cleanValue = String(value)
+                                .replace(/,/g, '')     // Remove commas
+                                .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                                .trim();               // Remove leading/trailing whitespace
+                            csvData.push([key.replace('_', ' '), cleanValue]);
+                        }
+                    }
+                }
+
+                // Add raw text (clean up newlines, commas and truncate if too long)
+                if (currentResponse.raw_text) {
+                    let rawText = currentResponse.raw_text
+                        .replace(/\n+/g, ' ')  // Replace newlines with spaces
+                        .replace(/,/g, '')     // Remove commas to avoid CSV delimiter issues
+                        .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                        .trim();               // Remove leading/trailing whitespace
+                    
+                    if (rawText.length > 1000) {
+                        rawText = rawText.substring(0, 1000) + '...';
+                    }
+                    
+                    csvData.push(['Raw Text', rawText]);
+                }
+
+                // Convert to CSV string
+                const csvContent = csvData.map(row => 
+                    row.map(field => {
+                        // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                        const escapedField = String(field).replace(/"/g, '""');
+                        return /[",\r\n]/.test(escapedField) ? `"${escapedField}"` : escapedField;
+                    }).join(',')
+                ).join('\n');
+
+                // Create blob and download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    
+                    // Generate filename with timestamp
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    const filename = `document_analysis_${currentResponse.document_type}_${timestamp}.csv`;
+                    link.setAttribute('download', filename);
+                    
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Show success feedback
+                    const btn = document.querySelector('button[onclick="exportToCSV()"]');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Downloaded!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                } else {
+                    throw new Error('CSV download not supported');
+                }
+
+            } catch (error) {
+                console.error('Export failed:', error);
+                showError(`Failed to export CSV: ${error.message}`);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
